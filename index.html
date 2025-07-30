@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>和同開珎　漢字パズル</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #f8f8f8;
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #gameArea {
+      width: 90vw;
+      height: 90vh;
+      background-color: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 40px;
+    }
+
+    button {
+      font-size: 1.2em;
+      padding: 10px 30px;
+      margin: 5px;
+      border: none;
+      border-radius: 10px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+.setting-group {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.setting-group label {
+  display: inline-block;
+  margin: 5px 10px;
+}
+
+.setting-group input[type="checkbox"],
+.setting-group input[type="radio"] {
+  transform: scale(1.3);
+  margin-right: 5px;
+}
+
+  </style>
+</head>
+<body>
+  <div id="gameArea"></div>
+  <script src="question.js"></script>
+  <script>
+let quizQuestions = [];
+let currentQuestionIndex = 0;
+let timeLimitSeconds = 0;
+let userAnswers = [];
+
+    window.onload = function () {
+      showTitleScreen();
+    };
+
+    function showTitleScreen() {
+        quizQuestions = [];
+        currentQuestionIndex = 0;
+        timeLimitSeconds = 0;
+        userAnswers = [];
+
+      const gameArea = document.getElementById("gameArea");
+      gameArea.innerHTML = `
+        <h1>和同開珎　漢字パズル</h1>
+        <button onclick="showHowTo()">遊び方</button><br>
+        <button onclick="startGame()">始める</button>
+      `;
+    }
+
+function showHowTo() {
+  const container = document.getElementById("gameArea");
+  container.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 90%;">
+      <h2 style="
+        background-color: #f5f5f5;
+        color: #333;
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 16px;
+        font-size: 20px;
+        border: 2px solid #ccc;
+        margin: 10px 0;
+      ">
+        和同開珎　漢字パズルの遊び方
+      </h2>
+      <button onclick="showTitleScreen()" style="
+        padding: 8px 16px;
+        font-size: 16px;
+        background-color: #666;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      " onmouseover="this.style.backgroundColor='#444'" onmouseout="this.style.backgroundColor='#666'">
+        もどる
+      </button>
+    </div>
+
+    <div class="question-block">
+      <div style="text-align: center; font-size: 35px; line-height: 1.5em;">
+        <div>山</div>
+        <div>↓</div>
+        <div>車 → <span style="
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+          width: 60px;
+          height: 60px;
+          border: 2px solid black;
+          font-size: 32px;
+          color: red;
+          vertical-align: middle;
+        ">道</span> → 路</div>
+        <div>↓</div>
+        <div>徳</div>
+      </div>
+      <p style="margin-top: 20px; font-size: 22px; line-height: 1.6em; text-align: left;">
+        矢印の方向に読めるように、真ん中の□に入る漢字一文字を答えよう！<br>
+        （例題の答えは「道」）<br><br>
+        紙とペンを用意して答えを書いても、大人数で早押しボタンや挙手で答えてもOK！
+      </p>
+    </div>
+  `;
+}
+
+
+function startGame() {
+  const gameArea = document.getElementById("gameArea");
+gameArea.innerHTML = `
+    <div style="display: flex; justify-content: flex-end; align-items: center; width: 90%;">
+      <button onclick="showTitleScreen()" style="
+        padding: 8px 16px;
+        font-size: 16px;
+        background-color: #666;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      " onmouseover="this.style.backgroundColor='#444'" onmouseout="this.style.backgroundColor='#666'">
+        もどる
+      </button>
+    </div>
+  <h2 style="margin-bottom: 5px; margin-top: 0px;">ゲーム設定</h2>
+
+  <div class="setting-group">
+    <p style="margin-bottom: 5px;"><strong>対象学年:</strong></p>
+    <label><input type="checkbox" value="1" id="grade1" checked> 1年</label>
+    <label><input type="checkbox" value="2" id="grade2" checked> 2年</label>
+    <label><input type="checkbox" value="3" id="grade3" checked> 3年</label><br>
+    <label><input type="checkbox" value="4" id="grade4"> 4年</label>
+    <label><input type="checkbox" value="5" id="grade5"> 5年</label>
+    <label><input type="checkbox" value="6" id="grade6"> 6年</label>
+  </div>
+
+  <div class="setting-group">
+    <p style="margin-bottom: 5px;"><strong>制限時間:</strong></p>
+    <label><input type="radio" name="timeLimit" value="10" checked> 10秒</label>
+    <label><input type="radio" name="timeLimit" value="15"> 15秒</label>
+    <label><input type="radio" name="timeLimit" value="20"> 20秒</label>
+    <label><input type="radio" name="timeLimit" value="25"> 25秒</label>
+    <label><input type="radio" name="timeLimit" value="30"> 30秒</label>
+    <label><input type="radio" name="timeLimit" value="0"> なし</label>
+  </div>
+
+  <div class="setting-group">
+    <p style="margin-bottom: 5px;"><strong>問題数:</strong></p>
+    <label><input type="radio" name="questionCount" value="5" checked> 5問</label>
+    <label><input type="radio" name="questionCount" value="6"> 6問</label>
+    <label><input type="radio" name="questionCount" value="7"> 7問</label>
+    <label><input type="radio" name="questionCount" value="8"> 8問</label>
+  </div>
+
+  <button onclick="beginQuiz()">ゲーム開始！</button>
+`;
+
+}
+
+function beginQuiz() {
+  // ✅ 対象学年の取得
+  const selectedGrades = [];
+  if (document.getElementById("grade1").checked) selectedGrades.push(1);
+  if (document.getElementById("grade2").checked) selectedGrades.push(2);
+  if (document.getElementById("grade3").checked) selectedGrades.push(3);
+  if (document.getElementById("grade4").checked) selectedGrades.push(4);
+  if (document.getElementById("grade5").checked) selectedGrades.push(5);
+  if (document.getElementById("grade6").checked) selectedGrades.push(6);
+
+  // ✅ 制限時間の取得
+// 制限時間と問題数を取得して保存
+timeLimitSeconds = parseInt(
+  document.querySelector('input[name="timeLimit"]:checked').value,
+  10
+); // 0なら制限なし
+  const selectedCount = parseInt(document.querySelector('input[name="questionCount"]:checked').value, 10);
+
+  // ✅ 確認（あとで削除してOK）
+  console.log("選ばれた学年:", selectedGrades);
+
+// ✅ 問題データの抽出とシャッフル
+const filteredQuestions = questions.filter(q => selectedGrades.includes(q.grade));
+
+// ✅ 問題数より多く用意されていればシャッフルして必要な数だけ取得
+const shuffledQuestions = filteredQuestions.sort(() => Math.random() - 0.5);
+const selectedQuestions = shuffledQuestions.slice(0, selectedCount);
+
+// ✅ グローバル変数に保存（次の処理で使用）
+quizQuestions = selectedQuestions;
+currentQuestionIndex = 0;
+
+console.log("quizQuestions:", quizQuestions);
+console.log("currentQuestionIndex:", currentQuestionIndex);
+
+// ✅ 出題スタート（関数 showQuestion を別途定義）
+showQuestion();
+
+}
+
+function getArrowFromJukugo(jukugo, answer, position) {
+  const index = jukugo.indexOf(answer); // 0 or 1
+
+  if (index === -1) return "？"; // 安全処理
+
+const arrowMap = {
+  0: ['↑', '↓'], // 上に表示：答えが前→↑ 後→↓
+  1: ['→', '←'], // 右に表示：前→→ 後→←
+  2: ['↓', '↑'], // 下に表示：前→↓ 後→↑
+  3: ['←', '→']  // 左に表示：前→← 後→→
+};
+
+  return arrowMap[position][index];
+}
+
+function showQuestion() {
+clearInterval(window.timerInterval); // showQuestion の冒頭で必ず一度止めておく
+
+  const container = document.getElementById("gameArea");
+  const question = quizQuestions[currentQuestionIndex];
+  const answer = question.answer;
+if (userAnswers.length === currentQuestionIndex) {
+  userAnswers.push(answer);
+}
+  const jukugoList = question.jukugo;
+  let timeRemaining = timeLimitSeconds;
+
+console.log("最初の問題:", quizQuestions[0]);
+
+  const parts = ["", "", "", ""];   // 相方の文字（上, 右, 下, 左）
+  const arrows = ["", "", "", ""];  // 矢印記号（↑, ←, など）
+
+  for (let i = 0; i < 4; i++) {
+    const jukugo = jukugoList[i];
+    const index = jukugo.indexOf(answer);
+
+    if (index === -1) {
+      parts[i] = "？";
+      arrows[i] = "？";
+      continue;
+    }
+
+    parts[i] = index === 0 ? jukugo[1] : jukugo[0];
+    arrows[i] = getArrowFromJukugo(jukugo, answer, i);
+  }
+
+const currentNumber = currentQuestionIndex + 1;
+
+let timerBarHTML = "";
+if (timeLimitSeconds > 0) {
+  timerBarHTML = `
+    <div id="timeBarContainer" style="width: 90%; background-color: #eee; height: 20px; border-radius: 10px; overflow: hidden; margin-top: 10px;">
+      <div id="timeBar" style="width: 100%; height: 100%; background-color: #66cc66; transition: width 1s linear;"></div>
+    </div>
+  `;
+}
+  container.innerHTML = `
+<div style="display: flex; justify-content: space-between; align-items: center; width: 90%;">
+  <h2 style="
+    background-color: #f5f5f5;
+    color: #333;
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 16px;
+    font-size: 20px;
+    border: 2px solid #ccc;
+    margin: 10px 0;
+  ">
+    問題${currentNumber}
+  </h2>
+  <button onclick="showTitleScreen()" style="
+    padding: 8px 16px;
+    font-size: 16px;
+    background-color: #666;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  " onmouseover="this.style.backgroundColor='#444'" onmouseout="this.style.backgroundColor='#666'">
+    もどる
+  </button>
+</div>
+
+    <div class="question-block">
+      <div style="text-align: center; font-size: 35px; line-height: 1.5em;">
+        <div>${parts[0]}</div>
+        <div>${arrows[0]}</div>
+        <div>${parts[3]} ${arrows[3]} 
+            <span id="answerBox" style="
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+  border: 2px solid black;
+  font-size: 24px;
+  vertical-align: middle;
+"></span>
+ ${arrows[1]} ${parts[1]}</div>
+        <div>${arrows[2]}</div>
+        <div>${parts[2]}</div>
+      </div>
+      <p style="margin-top: 20px; font-size: 24px;">□に入る漢字を答えよう！</p>
+    </div>
+    <button id="showAnswerBtn" onclick="showAnswer()">答えを見る</button>
+ ${timerBarHTML}
+
+  `;
+
+if (timeLimitSeconds > 0) {
+  const timeBar = document.getElementById("timeBar");
+  const total = timeLimitSeconds;
+  const startTime = Date.now();
+
+  timeBar.style.transition = "width 0.1s linear";
+
+  function updateTimeBar() {
+    const elapsed = (Date.now() - startTime) / 1000;
+    const remaining = Math.max(0, total - elapsed);
+    const percent = (remaining / total) * 100;
+    timeBar.style.width = percent + "%";
+
+    if (remaining <= 0) {
+      clearInterval(window.timerInterval);
+      showAnswer();
+    }
+  }
+
+  updateTimeBar(); // ← 初回の更新を即座に実行！ここがポイント！
+  window.timerInterval = setInterval(updateTimeBar, 50);
+}
+
+
+
+}
+
+function showAnswer() {
+  clearInterval(window.timerInterval); // タイマー停止
+
+  // 赤字で答えを表示
+  const answerBox = document.getElementById("answerBox");
+  if (answerBox) {
+    answerBox.innerHTML = `<span style="color: red; font-size: 47px;">${quizQuestions[currentQuestionIndex].answer}</span>`;
+  }
+
+  // ボタンを「次の問題」ボタンに置き換え
+  const button = document.getElementById("showAnswerBtn");
+if (button) {
+  if (currentQuestionIndex < quizQuestions.length - 1) {
+    // まだ次の問題があるとき
+    button.innerText = "次の問題";
+    button.onclick = () => {
+      currentQuestionIndex++;
+      showQuestion();
+    };
+  } else {
+    // 最終問題のとき
+    button.innerText = "結果発表";
+    button.onclick = () => {
+      showResult();
+    };
+  }
+}
+
+}
+
+
+function showResult() {
+  const container = document.getElementById("gameArea");
+
+  let resultHTML = `<h2>答え</h2><div style="font-size: 32px;">`;
+
+  userAnswers.forEach((ans, idx) => {
+    resultHTML += `<div>問題${idx + 1}：${ans}</div>`;
+  });
+
+  resultHTML += `</div><br>
+  <p style="font-seize: 24px;">何問正解できたかな？</p>
+  <br><button onclick="showTitleScreen()" style="
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #008cba;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  ">メニューにもどる</button>`;
+
+  container.innerHTML = resultHTML;
+}
+
+  </script>
+</body>
+</html>

@@ -421,7 +421,7 @@ if (button) {
 function showResult() {
   const container = document.getElementById("gameArea");
 
-  let resultHTML = `<h2>答え</h2><div style="font-size: 32px;">`;
+  let resultHTML = `<h2>答え</h2><div style="font-size: 24px;">`;
 
   userAnswers.forEach((ans, idx) => {
     resultHTML += `<div>問題${idx + 1}：${ans}</div>`;
@@ -445,3 +445,4 @@ function showResult() {
   </script>
 </body>
 </html>
+
